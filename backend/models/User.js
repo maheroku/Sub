@@ -20,6 +20,14 @@ const userSchema = new mongoose.Schema({
   premiumUntil: {
     type: Date,
     default: null
+  },
+  stripeCustomerId: {
+    type: String,
+    default: null
+  },
+  stripeSubscriptionId: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

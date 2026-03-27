@@ -24,7 +24,7 @@ Laftel Sub is a personal subscription tracker. Users add their digital and physi
   - Renewal email reminders (7 days before)
   - Monthly spending report emails
 
-The `isPremium` flag on the User model controls access. Payment integration is not implemented in Phase 1.
+The `isPremium` flag on the User model controls access. Payment is processed via Stripe Checkout (see Billing section below).
 
 ## Deployment Notes
 
@@ -32,6 +32,24 @@ The `isPremium` flag on the User model controls access. Payment integration is n
 - Set `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM` for SMTP
 - `npm run build` in `frontend/`, then `npm start` in `backend/` — Express serves the React build
 - Email jobs start automatically on server startup (after MongoDB connects)
+
+## Billing
+
+Stripe Checkout handles premium upgrades. Three billing routes in `backend/routes/billing.js`:
+
+- **POST /api/billing/create-checkout-session**: creates a Stripe Checkout session for `monthly` or `yearly` plan; auto-creates a Stripe customer on first checkout and stores `stripeCustomerId` on the User
+- **POST /api/billing/portal**: opens the Stripe Billing Portal so premium users can manage or cancel their subscription
+- **POST /api/billing/webhook**: verifies Stripe signature and processes events:
+  - `checkout.session.completed` → sets `isPremium = true`, stores `premiumUntil` and `stripeSubscriptionId`
+  - `customer.subscription.deleted` → revokes premium
+  - `customer.subscription.updated` → syncs status
+  - `invoice.payment_failed` → revokes premium
+
+The webhook is mounted before `express.json()` in `server.js` to preserve the raw request body required for signature verification.
+
+Required env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_MONTHLY_PRICE_ID`, `STRIPE_YEARLY_PRICE_ID`, `APP_URL`.
+
+In the frontend, the "Upgrade to Premium" button opens an `UpgradeModal` with plan selection. Premium users see a "Manage Subscription" button instead.
 
 ## Email Jobs
 

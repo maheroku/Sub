@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-03-27 (Stripe premium upgrade flow)
+
+### feat: Stripe premium upgrade flow
+
+- Added `stripeCustomerId` and `stripeSubscriptionId` fields to User model
+- Created `backend/routes/billing.js`: POST /create-checkout-session (monthly/yearly plan), POST /portal (Stripe billing portal), and a webhookHandler for checkout.session.completed, customer.subscription.deleted, customer.subscription.updated, invoice.payment_failed
+- Webhook mounted before express.json() in server.js to receive raw body for signature verification
+- Added 5 Stripe env vars to .example.env (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_MONTHLY_PRICE_ID, STRIPE_YEARLY_PRICE_ID, APP_URL)
+- Frontend: created billing.js API module, UpgradeModal with monthly/yearly plan selection, wired Dashboard with upgrade and manage-subscription buttons, success banner on return from checkout
+- 11 new billing tests using jest.mock('stripe'); all 40 backend + 16 frontend tests pass
+
 ## 2026-03-27
 
 ### chore: add frontend component tests for SubscriptionList and SubscriptionForm

@@ -6,12 +6,18 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const subscriptionRoutes = require('./routes/subscriptions');
+const billingRoutes = require('./routes/billing');
+const { webhookHandler } = billingRoutes;
 const { startScheduler } = require('./jobs/schedulerService');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors());
+
+// Webhook must be registered before express.json() to receive raw body
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
+
 app.use(express.json());
 
 if (process.env.NODE_ENV !== 'test') {
@@ -33,6 +39,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/billing', billingRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/build')));

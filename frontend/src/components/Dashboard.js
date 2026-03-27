@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getSubscriptions, createSubscription, updateSubscription, deleteSubscription } from '../api/subscriptions';
+import { createPortalSession } from '../api/billing';
 import SubscriptionForm from './SubscriptionForm';
 import SubscriptionList from './SubscriptionList';
+import UpgradeModal from './UpgradeModal';
 
 function Dashboard({ user, onLogout }) {
   const [subscriptions, setSubscriptions] = useState([]);
@@ -11,6 +13,9 @@ function Dashboard({ user, onLogout }) {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [loadError, setLoadError] = useState('');
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState('');
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const fetchSubs = useCallback(async () => {
     try {
@@ -29,6 +34,17 @@ function Dashboard({ user, onLogout }) {
   useEffect(() => {
     fetchSubs();
   }, [fetchSubs]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgrade') === 'success') {
+      setUpgradeMessage('You are now a Premium member! Enjoy unlimited subscriptions.');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('upgrade') === 'cancelled') {
+      setUpgradeMessage('');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const now = new Date();
   const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -82,6 +98,20 @@ function Dashboard({ user, onLogout }) {
       }
     } catch (err) {
       // silently fail
+    }
+  };
+
+  const handleManageBilling = async () => {
+    setPortalLoading(true);
+    try {
+      const data = await createPortalSession();
+      if (data.success && data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -143,8 +173,12 @@ function Dashboard({ user, onLogout }) {
         <h1 style={styles.headerTitle}>Laftel Sub</h1>
         <div style={styles.headerRight}>
           <span style={{ fontSize: 13, color: '#6b7280' }}>{user.email}</span>
-          {!user.isPremium && (
-            <button style={styles.btnPremium} title="Upgrade to Premium for unlimited subscriptions">
+          {user.isPremium ? (
+            <button style={styles.btnOutline} onClick={handleManageBilling} disabled={portalLoading}>
+              {portalLoading ? 'Loading...' : 'Manage Subscription'}
+            </button>
+          ) : (
+            <button style={styles.btnPremium} onClick={() => setShowUpgrade(true)}>
               Upgrade to Premium
             </button>
           )}
@@ -153,6 +187,11 @@ function Dashboard({ user, onLogout }) {
       </div>
 
       <div style={styles.main}>
+        {upgradeMessage && (
+          <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', color: '#065f46', borderRadius: 6, padding: '10px 14px', marginBottom: 16, fontSize: 13 }}>
+            {upgradeMessage}
+          </div>
+        )}
         {loadError && <div style={styles.errorBox}>{loadError}</div>}
 
         <div style={styles.cards}>
@@ -203,6 +242,8 @@ function Dashboard({ user, onLogout }) {
           error={formError}
         />
       )}
+
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
     </div>
   );
 }
