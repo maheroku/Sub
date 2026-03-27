@@ -6,6 +6,7 @@ Personal subscription tracker — Know what you're paying for.
 
 - **Marketing-ready:** No
 - **Code review required:** No
+- **Is Pet Project:** Yes
 
 ## Architecture
 
