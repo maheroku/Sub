@@ -33,6 +33,7 @@ npm start
 
 ```
 cd backend && npm test
+cd frontend && CI=true npm test -- --watchAll=false
 ```
 
 ## Environment Variables

@@ -2,6 +2,10 @@
 
 ## 2026-03-27
 
+### chore: add frontend component tests for SubscriptionList and SubscriptionForm
+
+Added @testing-library/react, @testing-library/jest-dom, and @testing-library/user-event to the frontend. Created src/__tests__/SubscriptionList.test.js (8 tests): empty state, subscription rendering, urgent renewal badge within/beyond 7 days, onEdit/onDelete handler calls, category badge, multiple subscriptions. Created src/__tests__/SubscriptionForm.test.js (8 tests): add/edit titles, field pre-population from initial value, cancel button, overlay click dismiss, form submission with correct data, error display, loading/disabled state. All 16 frontend tests pass. Updated README to include the frontend test command.
+
 ### Premium email jobs: renewal reminders and monthly spending reports
 
 - Added nodemailer + node-cron dependencies
