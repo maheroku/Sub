@@ -29,8 +29,17 @@ The `isPremium` flag on the User model controls access. Payment integration is n
 ## Deployment Notes
 
 - Set `NODE_ENV=production` and `MONGODB_URI`, `JWT_SECRET`, `PORT` in environment
+- Set `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM` for SMTP
 - `npm run build` in `frontend/`, then `npm start` in `backend/` — Express serves the React build
-- No email service wired yet — premium email features are placeholders for Phase 2
+- Email jobs start automatically on server startup (after MongoDB connects)
+
+## Email Jobs
+
+Two scheduled jobs run for premium users:
+- **Renewal reminders** (`backend/jobs/schedulerService.js`): daily at 09:00, finds subscriptions renewing in exactly 7 days and emails the owner
+- **Monthly spending report** (`backend/jobs/schedulerService.js`): 1st of each month at 08:00, emails all premium users their full subscription cost summary
+
+Email sending is handled by `backend/services/emailService.js` (nodemailer SMTP).
 
 ## Key Decisions
 

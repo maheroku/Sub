@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const subscriptionRoutes = require('./routes/subscriptions');
+const { startScheduler } = require('./jobs/schedulerService');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -15,7 +16,10 @@ app.use(express.json());
 
 if (process.env.NODE_ENV !== 'test') {
   mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected successfully'))
+    .then(() => {
+      console.log('MongoDB connected successfully');
+      startScheduler();
+    })
     .catch((err) => console.error('MongoDB connection error:', err));
 }
 

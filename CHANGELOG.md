@@ -2,6 +2,16 @@
 
 ## 2026-03-27
 
+### Premium email jobs: renewal reminders and monthly spending reports
+
+- Added nodemailer + node-cron dependencies
+- `backend/services/emailService.js`: SMTP email service with sendRenewalReminder and sendMonthlyReport; supports transporter injection for testing
+- `backend/jobs/schedulerService.js`: daily renewal reminder job (09:00, 7-day lookahead, premium users only) and monthly report job (08:00 on 1st, all premium users)
+- Wired scheduler startup into server.js after MongoDB connects; skipped in test env
+- Added 6 EMAIL_* env vars to .example.env
+- 10 new tests in emailJobs.test.js using jest.mock for transport isolation; 29 tests total, all passing
+- Updated context/Overview.md with email job docs
+
 ### Initial project setup
 
 - Created Laftel Sub project — a personal subscription tracker web app
